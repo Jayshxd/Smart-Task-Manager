@@ -8,6 +8,11 @@ import {
   FocusMode,
   Sidebar,
   Header,
+  ToastContainer,
+  QuickStats,
+  Confetti,
+  useConfetti,
+  setConfettiTrigger,
 } from '@/components'
 import { useKeyboardShortcuts, useTasks } from '@/hooks'
 
@@ -23,6 +28,12 @@ const queryClient = new QueryClient({
 function TaskManager() {
   useKeyboardShortcuts()
   const { isLoading, error } = useTasks()
+  const { particles, trigger: triggerConfetti } = useConfetti()
+
+  // Set up global confetti trigger
+  useEffect(() => {
+    setConfettiTrigger(triggerConfetti)
+  }, [triggerConfetti])
 
   // Request notification permission for pomodoro
   useEffect(() => {
@@ -70,12 +81,19 @@ function TaskManager() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      {/* Confetti */}
+      <Confetti particles={particles} />
+
+      {/* Toast notifications */}
+      <ToastContainer />
+
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 p-8 overflow-hidden">
         <Header />
+        <QuickStats />
 
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
