@@ -20,11 +20,11 @@ public class Task {
 
     private List<SubItem> steps;
 
-    private boolean completed;
+    private Boolean completed;
     private String priority; // LOW, MEDIUM, HIGH, URGENT
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private int focusTimeMinutes; // Total focus time spent on this task
-    private int pomodoroCount; // Number of pomodoro sessions completed
+    private Integer focusTimeMinutes; // Total focus time spent on this task
+    private Integer pomodoroCount; // Number of pomodoro sessions completed
 }

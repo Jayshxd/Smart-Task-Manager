@@ -48,7 +48,7 @@ public class TaskController {
             updatedTask.setTags(task.getTags());
             updatedTask.setDescription(task.getDescription());
             updatedTask.setSteps(task.getSteps());
-            updatedTask.setCompleted(task.isCompleted());
+            updatedTask.setCompleted(task.getCompleted());
             updatedTask.setPriority(task.getPriority());
             updatedTask.setDueDate(task.getDueDate());
             updatedTask.setFocusTimeMinutes(task.getFocusTimeMinutes());
@@ -84,9 +84,15 @@ public class TaskController {
             if(task.getDueDate() != null) {
                 updatedTask.setDueDate(task.getDueDate());
             }
-            updatedTask.setCompleted(task.isCompleted());
-            updatedTask.setFocusTimeMinutes(task.getFocusTimeMinutes());
-            updatedTask.setPomodoroCount(task.getPomodoroCount());
+            if(task.getCompleted() != null) {
+                updatedTask.setCompleted(task.getCompleted());
+            }
+            if(task.getFocusTimeMinutes() != null) {
+                updatedTask.setFocusTimeMinutes(task.getFocusTimeMinutes());
+            }
+            if(task.getPomodoroCount() != null) {
+                updatedTask.setPomodoroCount(task.getPomodoroCount());
+            }
             updatedTask.setUpdatedAt(LocalDateTime.now());
             Task savedTask = taskRepo.save(updatedTask);
             return new ResponseEntity<>(savedTask, HttpStatus.OK);
@@ -101,7 +107,8 @@ public class TaskController {
         Optional<Task> originalTask = taskRepo.findById(id);
         if(originalTask.isPresent()) {
             Task updatedTask = originalTask.get();
-            updatedTask.setCompleted(!updatedTask.isCompleted());
+            Boolean currentCompleted = updatedTask.getCompleted();
+            updatedTask.setCompleted(currentCompleted == null ? true : !currentCompleted);
             updatedTask.setUpdatedAt(LocalDateTime.now());
             Task savedTask = taskRepo.save(updatedTask);
             return new ResponseEntity<>(savedTask, HttpStatus.OK);
