@@ -9,4 +9,10 @@ import java.util.List;
 public interface TaskRepo extends MongoRepository<Task, String> {
 
     List<Task> findByTags(String tags);
+
+    List<Task> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
+
+    List<Task> findByPriority(String priority);
+
+    List<Task> findByCompleted(boolean completed);
 }

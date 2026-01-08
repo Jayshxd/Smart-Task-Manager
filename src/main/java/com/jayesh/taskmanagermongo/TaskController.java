@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,11 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        task.setCreatedAt(LocalDateTime.now());
+        task.setUpdatedAt(LocalDateTime.now());
+        if (task.getPriority() == null) {
+            task.setPriority("MEDIUM");
+        }
         Task savedTask = taskRepo.save(task);
         return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
     }
@@ -42,6 +48,12 @@ public class TaskController {
             updatedTask.setTags(task.getTags());
             updatedTask.setDescription(task.getDescription());
             updatedTask.setSteps(task.getSteps());
+            updatedTask.setCompleted(task.getCompleted());
+            updatedTask.setPriority(task.getPriority());
+            updatedTask.setDueDate(task.getDueDate());
+            updatedTask.setFocusTimeMinutes(task.getFocusTimeMinutes());
+            updatedTask.setPomodoroCount(task.getPomodoroCount());
+            updatedTask.setUpdatedAt(LocalDateTime.now());
             Task savedTask = taskRepo.save(updatedTask);
             return new ResponseEntity<>(savedTask, HttpStatus.OK);
         }else {
@@ -54,24 +66,87 @@ public class TaskController {
         Optional<Task> originalTask = taskRepo.findById(id);
         if(originalTask.isPresent()) {
             Task updatedTask = originalTask.get();
-            if(updatedTask.getDescription() != null) {
-                updatedTask.setDescription(updatedTask.getDescription());
+            if(task.getDescription() != null) {
+                updatedTask.setDescription(task.getDescription());
             }
-            if(updatedTask.getSteps() != null) {
-                updatedTask.setSteps(updatedTask.getSteps());
+            if(task.getSteps() != null) {
+                updatedTask.setSteps(task.getSteps());
             }
-            if(updatedTask.getTags() != null) {
-                updatedTask.setTags(updatedTask.getTags());
+            if(task.getTags() != null) {
+                updatedTask.setTags(task.getTags());
             }
-            if(updatedTask.getTitle() != null) {
-                updatedTask.setTitle(updatedTask.getTitle());
+            if(task.getTitle() != null) {
+                updatedTask.setTitle(task.getTitle());
             }
+            if(task.getPriority() != null) {
+                updatedTask.setPriority(task.getPriority());
+            }
+            if(task.getDueDate() != null) {
+                updatedTask.setDueDate(task.getDueDate());
+            }
+            if(task.getCompleted() != null) {
+                updatedTask.setCompleted(task.getCompleted());
+            }
+            if(task.getFocusTimeMinutes() != null) {
+                updatedTask.setFocusTimeMinutes(task.getFocusTimeMinutes());
+            }
+            if(task.getPomodoroCount() != null) {
+                updatedTask.setPomodoroCount(task.getPomodoroCount());
+            }
+            updatedTask.setUpdatedAt(LocalDateTime.now());
             Task savedTask = taskRepo.save(updatedTask);
             return new ResponseEntity<>(savedTask, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<Task> toggleTaskComplete(@PathVariable String id) {
+        Optional<Task> originalTask = taskRepo.findById(id);
+        if(originalTask.isPresent()) {
+            Task updatedTask = originalTask.get();
+            Boolean currentCompleted = updatedTask.getCompleted();
+            updatedTask.setCompleted(currentCompleted == null ? true : !currentCompleted);
+            updatedTask.setUpdatedAt(LocalDateTime.now());
+            Task savedTask = taskRepo.save(updatedTask);
+            return new ResponseEntity<>(savedTask, HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Task> getTaskById(@PathVariable String id) {
+        Optional<Task> task = taskRepo.findById(id);
+        return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Task>> searchTasks(@RequestParam String q) {
+        List<Task> tasks = taskRepo.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(q, q);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    @GetMapping("/priority/{priority}")
+    public ResponseEntity<List<Task>> getTasksByPriority(@PathVariable String priority) {
+        List<Task> tasks = taskRepo.findByPriority(priority.toUpperCase());
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<List<Task>> getCompletedTasks() {
+        List<Task> tasks = taskRepo.findByCompleted(true);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Task>> getPendingTasks() {
+        List<Task> tasks = taskRepo.findByCompleted(false);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
